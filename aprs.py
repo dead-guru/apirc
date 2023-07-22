@@ -6,6 +6,7 @@ import irc.client
 import irc.client_aio
 
 from ax253 import Frame
+from datetime import datetime
 import kiss
 import aprslib
 
@@ -20,6 +21,22 @@ nickname = os.environ.get('BOT_NICK', "aprsbot")
 
 logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.DEBUG) ## TODO: Make logging level configurable
+
+def parse_frame(date, frame):
+    try:
+        parsed = aprslib.parse(str(frame))
+    except (aprslib.ParseError, aprslib.UnknownFormat) as exp:
+        logger.error(f"Failed to parse frame: {frame}")
+        return str(frame)
+    formatted_string = date.strftime('%H:%M:%S.%f')[:-3] + " " + "{} -> {} -> {}:".format(parsed["from"], parsed["via"], parsed["to"])
+    formatted_string += " <{:.4f} {:.4f}>".format(parsed["latitude"], parsed["longitude"]) if "longitude" in parsed and "latitude" in parsed else ""
+    formatted_string += " tUNIT: " + ",".join(parsed["tUNIT"]) if "tUNIT" in parsed else ""
+    formatted_string += " tPARM: " + ",".join(parsed["tPARM"]) if "tPARM" in parsed else ""
+    formatted_string += " tEQNS: " + ",".join([''.join(str(i)) for i in parsed["tEQNS"]]) if "tEQNS" in parsed else ""
+    formatted_string += " tBITS: {}".format(parsed["tBITS"]) if "tBITS" in parsed else ""
+    formatted_string += " {}".format(parsed["comment"]) if "comment" in parsed else ""
+    formatted_string += " {}".format(parsed["title"]) if "title" in parsed else ""
+    return formatted_string
 
 async def main():
     logger.info(f"Connecting to {server}:{port} as {nickname}")
@@ -36,16 +53,13 @@ async def main():
         loop=loop,
     )
     
-    irc_client.privmsg(channel, '[APRS] Starting...')
+    irc_client.privmsg(channel, 'Starting...')
     
     async for frame in kiss_protocol.read():
-        try:
-            packet = aprslib.parse(str(frame))
-        except (aprslib.ParseError, aprslib.UnknownFormat) as exp:
-            pass
-        ## TODO: Build APRS message from packet
+        time = datetime.utcnow()
+        
         logger.debug(f"Received frame: {frame}")   
-        irc_client.privmsg(channel, str(frame)) ## TODO: Parse frame and send to channel
+        irc_client.privmsg(channel, parse_frame(time, frame))
         
 
 if __name__ == "__main__":
