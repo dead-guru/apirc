@@ -1,5 +1,7 @@
 # APRS to IRC Gateway via RTL-SDR
 
+Need discussion on how to do this better? [Join the discussion on IRC](irc://irc.dead.guru/spau)
+
 ## Install RTL-SDR
 
 ```bash
