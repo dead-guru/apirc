@@ -70,3 +70,11 @@ pip install kiss3 irc aprslib
 
 KISS_HOST=localhost KISS_PORT=8001 IRC_HOST=irc.example.com IRC_PORT=6697 CHANNEL_NAME="#example" BOT_NICK=aprs python3 aprs.py
 ```
+
+## TODO
+
+- [ ] Add docker image for bot
+- [ ] Add docker image for radio stack ?
+- [ ] Add docker-compose file
+- [ ] Add systemd service file
+- [ ] Add systemd service file for radio stack ?
