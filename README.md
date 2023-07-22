@@ -66,7 +66,7 @@ or `chmod a+x aprs.sh` and `./aprs.sh`
 ## Run IRC Gateway
 
 ```shell
-pip install kiss3 irc
+pip install kiss3 irc aprslib
 
 KISS_HOST=localhost KISS_PORT=8001 IRC_HOST=irc.example.com IRC_PORT=6697 CHANNEL_NAME="#example" BOT_NICK=aprs python3 aprs.py
 ```

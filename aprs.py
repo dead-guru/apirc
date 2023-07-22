@@ -7,6 +7,7 @@ import irc.client_aio
 
 from ax253 import Frame
 import kiss
+import aprslib
 
 MYCALL = os.environ.get("MYCALL", "N0CALL")
 KISS_HOST = os.environ.get("KISS_HOST", "10.10.10.91")
@@ -18,7 +19,7 @@ channel = os.environ.get('CHANNEL_NAME', "#spau")
 nickname = os.environ.get('BOT_NICK', "aprsbot")
 
 logger = logging.getLogger(__name__)
-logging.basicConfig(level=logging.DEBUG)
+logging.basicConfig(level=logging.DEBUG) ## TODO: Make logging level configurable
 
 async def main():
     logger.info(f"Connecting to {server}:{port} as {nickname}")
@@ -38,6 +39,11 @@ async def main():
     irc_client.privmsg(channel, '[APRS] Starting...')
     
     async for frame in kiss_protocol.read():
+        try:
+            packet = aprslib.parse(str(frame))
+        except (aprslib.ParseError, aprslib.UnknownFormat) as exp:
+            pass
+        ## TODO: Build APRS message from packet
         logger.debug(f"Received frame: {frame}")   
         irc_client.privmsg(channel, str(frame)) ## TODO: Parse frame and send to channel
         
